@@ -121,17 +121,30 @@ class DecisionTree:
         outcome_name: a string corresponding to name of the outcome varibale
         curr_depth: integer corresponding to current depth of the tree
         """
-        
+    
         # Reasonable base cases:
         # 1. All values of the outcome in the provided data are the same (all 1s or 0s)
-        # 2. Current depth is greater than or equal to max depth
+        for i in data:
+            new_vertex = Vertex(i)
+
+            if data[i] == 1 or data[i] == 1:
+                return 0
+
+            # 2. Current depth is greater than or equal to max depth
+            if curr_depth >= self.max_depth:
+                return 0
        
-        # Code ideas added Thurs. 10.27
-        # SEE HANDOUT for better description of steps
-        # going to need to implement iteration
-        best_feature, best_threshold, data_left, data_right = _get_best_split(self, data, outcome_name)
-        d_s1 = data_left
-        d_s2 = data_right
+            # create new vertex, recursively build left subtree and right subtree for this 
+            # vertex based on best split and returns vertex
+  
+            # going to need to implement iteration
+            best_feature, best_threshold, data_left, data_right = (self, data, outcome_name)._get_best_split()
+            d_s1 = data_left
+            d_s2 = data_right
+
+            curr_depth += 1
+
+            _build_tree(self, data, outcome_name, curr_depth)
 
         #TODO: Implement recursive function
         return Vertex(prediction=1)
@@ -158,27 +171,29 @@ class DecisionTree:
         sample: dictionary mapping from feature names to values of the feature
         """
         n = len(sample)
-        visited = [] # np.zeros(n, dtype=bool) #list of visited nodes; 0 to represent False aka not visited yet
-        s = [] # empty stack initialized to store nodes from sample
-        
+        visited = [] 
+        s = [] # empty stack initialized to store nodes from sample    
         # self.root of decision tree 
         # only will be one thing on stack at a time
         # if all nodes have been visited, end
         s.append(self.root)
         while len(s) > 0: # if run out of things to add to stack, we've reached a leaf node and we're done
             eval_node = s.pop()
+
+            # Left tree traversal
             if sample[eval_node.feature_name] < eval_node.threshold: # eval_node is the feature in the tree we are currently looking at
                 visited.append(eval_node)
-                eval_node = self.leftchild # move to lefthand side of tree and eval. a new feature
+                eval_node = self.left_child # move to lefthand side of tree and eval. a new feature
                 s.append(eval_node)
                 if eval_node.prediction == 1:
                     correct_leaf = eval_node
                 else:
                     correct_leaf = 0
 
+            # Right tree traversal
             elif sample[eval_node.feature_name] >= eval_node.threshold:
                 visited.append(eval_node)
-                eval_node = self.rightchild
+                eval_node = self.right_child
                 s.append(eval_node)
                 if eval_node.prediction == 1:
                     correct_leaf = eval_node
