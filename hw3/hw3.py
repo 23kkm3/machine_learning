@@ -96,19 +96,19 @@ class DecisionTree:
         data_left = None
         data_right = None
 
-        # TODO: Implement get best split
+        for i in data: # go row by row in the data frame
+            data_left = data.iloc[:i]
+            data_right = data.iloc[i:]
+            new_entropy = weighted_entropy(data_left, data_right, outcome_name)
+            if new_entropy < best_entropy:
+                best_entropy = new_entropy
+                best_feature = data[i].feature_name
+                best_threshold = data[i].threshold
 
+        # TODO: Implement get best split
          # naive approach to finding best split: compute entropy for scratch for each possible split
          # one split: gets all rows of data where feat. is <= val
          # other split: gets all rows of data where the feature is >= value
-
-         # FIRST SPLIT
-         # pandas dataframe has two columns of values that we will use to compute entropy
-        # for data.feature in data:
-        #     best_entropy 
-            
-
-
 
         return best_feature, best_threshold, data_left, data_right
         
@@ -122,6 +122,16 @@ class DecisionTree:
         curr_depth: integer corresponding to current depth of the tree
         """
         
+        # Reasonable base cases:
+        # 1. All values of the outcome in the provided data are the same (all 1s or 0s)
+        # 2. Current depth is greater than or equal to max depth
+       
+        # Code ideas added Thurs. 10.27
+        # SEE HANDOUT for better description of steps
+        # going to need to implement iteration
+        best_feature, best_threshold, data_left, data_right = _get_best_split(self, data, outcome_name)
+        d_s1 = data_left
+        d_s2 = data_right
 
         #TODO: Implement recursive function
         return Vertex(prediction=1)
