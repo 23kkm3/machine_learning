@@ -1,5 +1,6 @@
 #!/usr/bin/env python
 
+from xxlimited import new
 import numpy as np
 import pandas as pd
 from data_loader import load_simulated_data, load_transplant_data
@@ -89,7 +90,11 @@ class DecisionTree:
         (iii) pandas dataframe consisting of subset of rows of data where best_feature < best_threshold
         (iv) pandas dataframe consisting of subset of rows of data where best_feature >= best_threshold
         """
-        
+         # Implementation of get best split:
+         # naive approach to finding best split = compute entropy for scratch for each possible split
+         # one split: gets all rows of data where feat. is <= val
+         # other split: gets all rows of data where the feature is >= value
+
         best_entropy = entropy(data, outcome_name)
         best_feature = None
         best_threshold = 0
@@ -100,7 +105,7 @@ class DecisionTree:
         # loop over each value of the feature
         for feature in data.columns: # list of all names of features
             if feature == outcome_name:
-                continue #skip this feature and continue to next b/c want to ignore Y outcome column
+                continue # skip this feature and continue to next b/c want to ignore Y outcome column
             for i in data[feature]: # the particular feature's list
                 indices = data[feature] < i # list of indicies 
                 data_left = data[indices] 
@@ -118,12 +123,6 @@ class DecisionTree:
         #print(best_threshold)
         data_left = data[data[best_feature] < best_threshold]
         data_right = data[data[best_feature] >= best_threshold]
-        
-
-        # TODO: Implement get best split
-         # naive approach to finding best split: compute entropy for scratch for each possible split
-         # one split: gets all rows of data where feat. is <= val
-         # other split: gets all rows of data where the feature is >= value
 
         return best_feature, best_threshold, data_left, data_right
         
@@ -136,33 +135,49 @@ class DecisionTree:
         outcome_name: a string corresponding to name of the outcome varibale
         curr_depth: integer corresponding to current depth of the tree
         """
-    
-        # # Reasonable base cases:
-        # # 1. All values of the outcome in the provided data are the same (all 1s or 0s)
-        # for i in data:
-        #     new_vertex = Vertex(i)
-
-        #     if data[i] == 1 or data[i] == 1:
-        #         return 0
-
-        #     # 2. Current depth is greater than or equal to max depth
-        #     if curr_depth >= self.max_depth:
-        #         return 0
        
-        #     # create new vertex, recursively build left subtree and right subtree for this 
-        #     # vertex based on best split and returns vertex
-  
-        #     # going to need to implement iteration
-        #     best_feature, best_threshold, data_left, data_right = (self, data, outcome_name)._get_best_split()
-        #     d_s1 = data_left
-        #     d_s2 = data_right
+        #for feature in data.columns:
+        # Reasonable base cases:
+        # 1. All values of the outcome in the provided data are the same (all 1s or 0s)
+        if (entropy(data, outcome_name) == 0):
+            final = Vertex()
+            if np.mean(data[outcome_name]) == 1:
+                final.prediction = 1 # prediction
+            if np.mean(data[outcome_name]) == 0:
+                final.prediction = 0
+            return final
+        
+        # 2. Current depth is greater than or equal to max depth
+        # at leaf nodes, always output the majority class
+        if curr_depth >= self.max_depth:
+            # if more 1 outcomes than 0 outcomes or more 0s than 1s, output majority
+            final2 = Vertex()
+            for i in data[outcome_name]:
+                if i == 1:
+                    one_count += 1
+                if i == 0:
+                    zero_count += 1
+            if one_count >= zero_count:
+                final2.prediction = 1
+                return final2
+            else:
+                final2.prediction = 0
+                return final2
 
-        #     curr_depth += 1
 
-        #     _build_tree(self, data, outcome_name, curr_depth)
+        new_vertex = Vertex()
+        # create new vertex, recursively build left subtree and right subtree for this 
+        # vertex based on best split and returns vertex
 
-        #TODO: Implement recursive function
-        return Vertex(prediction=1)
+        # going to need to implement iteration
+        best_feature, best_threshold, data_left, data_right = self._get_best_split(data, outcome_name)
+        
+        new_vertex.left_child = self._build_tree(data_left, outcome_name, curr_depth+1)
+        new_vertex.right_child = self._build_tree(data_right, outcome_name, curr_depth+1)
+
+        #curr_depth += 1
+
+        return new_vertex
         
 
     def fit(self, Xmat, Y, outcome_name="Y"):
