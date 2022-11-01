@@ -43,10 +43,16 @@ def weighted_entropy(data1, data2, outcome_name):
     outcome_name: a string corresponding to name of the outcome varibale
     """
 
-    # ideas from lecture 7, slide 41
+    # denominator of weighted entropy function
     combined_lengths = len(data1) + len(data2)
+
+    # first component of entropy function numerator
     dataset_one = len(data1) * entropy(data1, outcome_name)
+
+    # second component of entropy function numerator
     dataset_two = len(data2) * entropy(data2, outcome_name)
+
+    # weighted entropy equation
     wgt_entr = (dataset_one + dataset_two)/combined_lengths
 
     return wgt_entr
@@ -91,9 +97,9 @@ class DecisionTree:
         (iv) pandas dataframe consisting of subset of rows of data where best_feature >= best_threshold
         """
          # Implementation of get best split:
-         # naive approach to finding best split = compute entropy for scratch for each possible split
-         # one split: gets all rows of data where feat. is <= val
-         # other split: gets all rows of data where the feature is >= value
+         # Naive approach to finding best split = compute entropy for scratch for each possible split
+         # One split: gets all rows of data where feat. is <= val
+         # Other split: gets all rows of data where the feature is >= value
 
         best_entropy = entropy(data, outcome_name)
         best_feature = None
@@ -102,25 +108,34 @@ class DecisionTree:
         data_right = None
 
         # loop over each feature
-        # loop over each value of the feature
-        for feature in data.columns: # list of all names of features
+        # list of all names of features
+        for feature in data.columns:
+            # skip Y outcome column feature
             if feature == outcome_name:
-                continue # skip this feature and continue to next b/c want to ignore Y outcome column
-            for i in data[feature]: # the particular feature's list
-                indices = data[feature] < i # list of indicies 
+                continue 
+            # loop over each value of the feature
+            for i in data[feature]:
+                # list of indicies less than i
+                indices = data[feature] < i 
+                # all rows that are less than some value in the pandas df
                 data_left = data[indices] 
-                # how to get indices of all rows that are less than or equal to some val. in pandas df
-                indices2 = data[feature] >= i # list of indicies 
+
+                # list of indicies  greater than or = to i
+                indices2 = data[feature] >= i
+                # all rows that are greater than or equal to some value in the pandas df
                 data_right = data[indices2] 
                 new_entropy = weighted_entropy(data_left, data_right, outcome_name)
             
                 if new_entropy < best_entropy:
+                    # reassign best_entropy with updated value
                     best_entropy = new_entropy
                     best_feature = feature
                     best_threshold = i
                 
-        #print(best_feature)
-        #print(best_threshold)
+        # Assign the values in the data frame:
+        # data_left = less than the threshold
+        # data_right = greater than or equal to the threshold
+         
         data_left = data[data[best_feature] < best_threshold]
         data_right = data[data[best_feature] >= best_threshold]
 
@@ -135,22 +150,24 @@ class DecisionTree:
         outcome_name: a string corresponding to name of the outcome varibale
         curr_depth: integer corresponding to current depth of the tree
         """
-       
-        #for feature in data.columns:
+
         # Reasonable base cases:
         # 1. All values of the outcome in the provided data are the same (all 1s or 0s)
         if (entropy(data, outcome_name) == 0):
             final = Vertex()
             if np.mean(data[outcome_name]) == 1:
-                final.prediction = 1 # prediction
+                # set the prediciton value are the leaf node
+                final.prediction = 1
             if np.mean(data[outcome_name]) == 0:
                 final.prediction = 0
             return final
         
         # 2. Current depth is greater than or equal to max depth
-        # at leaf nodes, always output the majority class
+        # At leaf nodes, always output the majority class
+        zero_count = 0
+        one_count = 0
         if curr_depth >= self.max_depth:
-            # if more 1 outcomes than 0 outcomes or more 0s than 1s, output majority
+            # If more outcomes of 1 than 0 or more 0s than 1s, output majority
             final2 = Vertex()
             for i in data[outcome_name]:
                 if i == 1:
@@ -169,13 +186,15 @@ class DecisionTree:
         # create new vertex, recursively build left subtree and right subtree for this 
         # vertex based on best split and returns vertex
 
-        # going to need to implement iteration
         best_feature, best_threshold, data_left, data_right = self._get_best_split(data, outcome_name)
         
+        new_vertex.feature_name = best_feature
+        new_vertex.threshold = best_threshold
         new_vertex.left_child = self._build_tree(data_left, outcome_name, curr_depth+1)
         new_vertex.right_child = self._build_tree(data_right, outcome_name, curr_depth+1)
 
-        #curr_depth += 1
+
+        # curr_depth += 1
 
         return new_vertex
         
@@ -202,21 +221,27 @@ class DecisionTree:
         """
         n = len(sample)
         visited = [] 
-        s = [] # empty stack initialized to store nodes from sample    
+        s = [] # empty stack initialized to store nodes from sample  
+
         # self.root of decision tree 
-        # only will be one thing on stack at a time
+        # only one thing will be on the stack at a time
         # if all nodes have been visited, end
         s.append(self.root)
-        while len(s) > 0: # if run out of things to add to stack, we've reached a leaf node and we're done
+
+        # If we run out of things to add to stack, we have reached a leaf node and we're done
+        while len(s) > 0: 
             eval_node = s.pop()
 
             if eval_node.prediction is not None:
                 return eval_node.prediction
             
             # Left tree traversal
-            if sample[eval_node.feature_name] < eval_node.threshold: # eval_node is the feature in the tree we are currently looking at
+            # eval_node is the feature in the tree we are currently looking at
+            if sample[eval_node.feature_name] < eval_node.threshold:
                 visited.append(eval_node)
-                eval_node = eval_node.left_child # move to lefthand side of tree and eval. a new feature
+
+                # move to lefthand side of tree and eval. a new feature
+                eval_node = eval_node.left_child
                 s.append(eval_node)
 
             # Right tree traversal
@@ -224,8 +249,6 @@ class DecisionTree:
                 visited.append(eval_node)
                 eval_node = eval_node.right_child
                 s.append(eval_node)
-
-         
 
     def predict(self, Xmat):
         """
