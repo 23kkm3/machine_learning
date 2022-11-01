@@ -114,23 +114,29 @@ class DecisionTree:
             if feature == outcome_name:
                 continue 
             # loop over each value of the feature
-            for i in data[feature]:
-                # list of indicies less than i
-                indices = data[feature] < i 
-                # all rows that are less than some value in the pandas df
-                data_left = data[indices] 
+            # look at computing the unique values for that particular feature 
 
-                # list of indicies  greater than or = to i
-                indices2 = data[feature] >= i
-                # all rows that are greater than or equal to some value in the pandas df
-                data_right = data[indices2] 
-                new_entropy = weighted_entropy(data_left, data_right, outcome_name)
-            
-                if new_entropy < best_entropy:
-                    # reassign best_entropy with updated value
-                    best_entropy = new_entropy
-                    best_feature = feature
-                    best_threshold = i
+            for i in data[feature]:
+                unique_vals = []
+                # check to avoid recomputing recurring values
+                if i not in unique_vals: 
+                    unique_vals.append(i)
+                    # list of indicies less than i
+                    indices = data[feature] < i 
+                    # all rows that are less than some value in the pandas df
+                    data_left = data[indices] 
+
+                    # list of indicies  greater than or = to i
+                    indices2 = data[feature] >= i
+                    # all rows that are greater than or equal to some value in the pandas df
+                    data_right = data[indices2] 
+                    new_entropy = weighted_entropy(data_left, data_right, outcome_name)
+                
+                    if new_entropy < best_entropy:
+                        # reassign best_entropy with updated value
+                        best_entropy = new_entropy
+                        best_feature = feature
+                        best_threshold = i
                 
         # Assign the values in the data frame:
         # data_left = less than the threshold
@@ -164,11 +170,11 @@ class DecisionTree:
         
         # 2. Current depth is greater than or equal to max depth
         # At leaf nodes, always output the majority class
-        zero_count = 0
-        one_count = 0
         if curr_depth >= self.max_depth:
             # If more outcomes of 1 than 0 or more 0s than 1s, output majority
             final2 = Vertex()
+            zero_count = 0
+            one_count = 0
             for i in data[outcome_name]:
                 if i == 1:
                     one_count += 1
@@ -176,10 +182,10 @@ class DecisionTree:
                     zero_count += 1
             if one_count >= zero_count:
                 final2.prediction = 1
-                return final2
             else:
                 final2.prediction = 0
-                return final2
+            
+            return final2
 
 
         new_vertex = Vertex()
@@ -192,7 +198,6 @@ class DecisionTree:
         new_vertex.threshold = best_threshold
         new_vertex.left_child = self._build_tree(data_left, outcome_name, curr_depth+1)
         new_vertex.right_child = self._build_tree(data_right, outcome_name, curr_depth+1)
-
 
         # curr_depth += 1
 
@@ -346,12 +351,14 @@ def main():
     
         accuracies = []
         for i in range(5):
+            print("training tree", i)
             Xtrain_i, Xval, Ytrain_i, Yval = train_test_split(Xtrain, Ytrain, test_size=0.3, random_state=i)
             Xtrain_i.reset_index(inplace=True, drop=True)
             Xval.reset_index(inplace=True, drop=True)
             model = DecisionTree(max_depth=depth)
             model.fit(Xtrain_i, Ytrain_i, "survival_status")
             accuracies.append(accuracy(Yval, model.predict(Xval)))
+           
     
         mean_accuracy = sum(accuracies)/len(accuracies)
         if mean_accuracy > best_accuracy:
