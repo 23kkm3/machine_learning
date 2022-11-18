@@ -125,7 +125,7 @@ class Value:
         
         def _backward():
             # derivative of e^x is e^x
-            self.grad += np.exp(out.data) * out.grad
+            self.grad += np.exp(self.data) * out.grad
         
         out._backward = _backward
         return out
@@ -135,11 +135,11 @@ class Value:
         Implementing log
         """
         
-        out = Value(np.log(self.data), _parents=(self,), _operation=("log"))
+        out = Value(math.log(self.data), _parents=(self,), _operation=("log"))
         
         def _backward():
             # derivative of natural log of x is 1/x
-            self.grad += (1/out.data) * out.grad
+            self.grad += (1/self.data) * out.grad
         
         out._backward = _backward
 
@@ -178,24 +178,18 @@ def sigmoid(value, scale=0.5):
 
     return 1/(1+((-scale * value).exp()))
 
-    # return Value(0.5)
-
 def negative_loglikelihood(y, pY1):
     """
     Return negative loglikelihood for a single example based on the value of Y and p(Y=1 | ...)
     """
 
     first_part = (y * ((pY1).log()))
-
     
     second_part = ((1-y) * ((1-pY1).log()))
 
-
-    negative_log_like = np.mean(first_part + second_part)
+    negative_log_like = (first_part + second_part)
 
     return (-1) * negative_log_like
-
-    #return Value(0.5)
 
 
 class Neuron:
@@ -221,15 +215,18 @@ class Neuron:
         # TODO edit to implement dropout
         # know that what we want to do is sample a "thinned" subset of the neural network
         # at each iteratin of gradient descent, produce a Bernoulli (0/1) random variable 
-        # w/ probability p. Then take elementwise produce btween theta and D (dropout vector)
+        # w/ probability p. Then take elementwise product btween theta and D (dropout vector) ; we do not need 
+        # a vector because we are doing it piecewise/elementwise
         # before forward pass thru network to obtain predictions/loss 
         # this is equivalent to shutting off some connections in the network w/ probability p at each iteration
 
+        # training mode = we are performing dropout
         if train_mode:
-            out = sum([self.theta[i]*x[i] for i in range(len(self.theta))]) + self.intercept
+            out = sum([self.theta[i]*(np.random.binomial(1,dropout_proba)) for i in range(len(self.theta))]) + (np.random.binomial(1, dropout_proba))
 
-        else:
-            out = sum([self.theta[i]*x[i] for i in range(len(self.theta))]) + self.intercept
+        # testing mode = we are just reweighting
+        else: # test mode
+            out = sum([self.theta[i]*(dropout_proba) for i in range(len(self.theta))]) + self.intercept * dropout_proba
         
         # activate using ReLU based on boolean flag
         if relu:
@@ -310,41 +307,6 @@ class MLP:
         """
         for p in self.parameters():
             p.grad = 0
-            
-    # Calculate gradient function added in Wed. 11/16
-    def _calculate_gradient(self, Xmat, Y, theta_p, h=1e-5):
-        """
-        Helper function for computing the gradient at a point theta_p.
-        """
-
-        # get dimensions of the matrix
-        n, d = Xmat.shape
-
-        grad_vec = np.zeros(d)
-
-        # initial guess = theta p in this case
-
-        # retrieving the Yhat (predicted) value 
-        Yhat = Xmat@theta_p
-
-        for x in range(0, d):
-
-            # theta_p_plus_h is theta perturbed 
-            # copy vector
-            theta_p_plus_h = theta_p.copy()
-
-            # increment the value stored at index x in perturbed vector by h
-            theta_p_plus_h[x] = theta_p_plus_h[x] + h
-
-            # retrieve new Yhat with the perturbed theta p vector
-            new_Yhat = Xmat@theta_p_plus_h 
-
-            # gradient caclulation using mse as loss function
-            grad = (negative_loglikelihood(Y, new_Yhat) - negative_loglikelihood(Y, Yhat))/h
-
-            grad_vec[x] = grad
-
-        return grad_vec
 
     def fit(self, Xmat_train, Y_train, Xmat_val=None, Y_val=None, max_epochs=100, verbose=False):
         """
@@ -369,36 +331,18 @@ class MLP:
             # for samples i = 1, 2, ... , n do:
             # theta t+1 = theta t - alpha * gradienti(theta t) [gradient for single sample i]
 
-            # choose learning rate alpa
-            learning_rate = 0.1
+            # compute loss for examples one at a time
+            for x,y in zip(Xmat_train,Y_train):
+                    
+                self._zero_grad()
+                # y-train are the actual outcomes
+                # xmat train are the data (inputs)
+                # want to predict based on input x 
+                loss = negative_loglikelihood(y, self(x))
+                loss.backward()
 
-                    # get dimensions of the matrix
-            n, d = Xmat_train.shape        
-
-            # initialize the first theta and theta new randomly
-            theta = np.random.uniform(-5, 5, d)
-            theta_new = np.random.uniform(-5, 5, d)
-            iteration = 0
-
-            # TODO: Implement code that performs gradient descent until "convergence"
-            # i.e., until max_iterations or until the change in theta measured by mean absolute difference
-            # is less than the tolerance argument
-
-            x = 0
-
-            while x < 10000:
-            # if we don't update our new theta to be the old, we will just keep iterating on the same points
-                theta = theta_new.copy()
-
-                # calculate theta_new
-                theta_new = (theta - self.learning_rate * self._calculate_gradient(Xmat_train, Y_train, theta, h=1e-5))
-
-                if negative_loglikelihood(theta, theta_new) < 10000:
-                    break
-
-                x += 1
-
-
+                for x in self.parameters():
+                    x.data = x.data - self.learning_rate * x.grad
 
             # use the verbose flag with True when debugging your outputs
             if verbose:
@@ -432,7 +376,7 @@ def spotify_data():
 
     data = pd.read_csv("spotify_data.csv")
 
-    # TODO: Write code to pre-process the data here
+    # Code to pre-process the data here
     data_clean = data.drop(columns=["id", "name"])
 
 
@@ -442,6 +386,14 @@ def spotify_data():
     Xmat_train, Xmat_test, Y_train, Y_test = train_test_split(Xmat, Y, test_size=0.33, random_state=42)
     Xmat_train, Xmat_val, Y_train, Y_val = train_test_split(Xmat_train, Y_train, test_size=0.33, random_state=42)
     n, d = Xmat_train.shape
+
+    # standardize the data ; need it here because need training split completed
+    mean = np.mean(Xmat_train, axis=0)
+    std = np.std(Xmat_train, axis=0)
+    Xmat_train = (Xmat_train - mean)/std
+    Xmat_val = (Xmat_val - mean)/std
+    Xmat_test = (Xmat_test - mean)/std
+    
 
     model = MLP(n_features=d, layer_sizes=[1])
     model.fit(Xmat_train, Y_train, max_epochs=25, verbose=False)
