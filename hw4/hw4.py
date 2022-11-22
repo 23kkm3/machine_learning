@@ -176,6 +176,9 @@ def sigmoid(value, scale=0.5):
     Returns sig(value) using the scale parameter
     """
 
+    # for testing purposes to evalutate what scale parameter does
+    # print(value)
+    # print('part 2' , 1/(1+((-scale * value).exp())))
     return 1/(1+((-scale * value).exp()))
 
 def negative_loglikelihood(y, pY1):
@@ -210,23 +213,19 @@ class Neuron:
         """
         Implementing the function call operator ()
         """
-        
-        # produce linear combination of inputs + intercept
-        # TODO edit to implement dropout
-        # know that what we want to do is sample a "thinned" subset of the neural network
-        # at each iteratin of gradient descent, produce a Bernoulli (0/1) random variable 
-        # w/ probability p. Then take elementwise product btween theta and D (dropout vector) ; we do not need 
-        # a vector because we are doing it piecewise/elementwise
-        # before forward pass thru network to obtain predictions/loss 
-        # this is equivalent to shutting off some connections in the network w/ probability p at each iteration
+    
+        # COMPLETED: edited and implemented dropout
 
         # training mode = we are performing dropout
+        # must multiply by x[i]  in order to access data
+        # 1-dropout_proba because we want to cut off 10% of connections rather than 90% 
+        # if too many connections are cut off during dropout, it will not adequately learn
         if train_mode:
-            out = sum([self.theta[i]*(np.random.binomial(1,dropout_proba)) for i in range(len(self.theta))]) + (np.random.binomial(1, dropout_proba))
+            out = sum([x[i] * self.theta[i]*(np.random.binomial(1,(1-dropout_proba))) for i in range(len(self.theta))]) + (np.random.binomial(1, (1-dropout_proba)))
 
         # testing mode = we are just reweighting
-        else: # test mode
-            out = sum([self.theta[i]*(dropout_proba) for i in range(len(self.theta))]) + self.intercept * dropout_proba
+        else: 
+            out = sum([x[i] * self.theta[i]*(1-dropout_proba) for i in range(len(self.theta))]) + self.intercept * (1-dropout_proba)
         
         # activate using ReLU based on boolean flag
         if relu:
@@ -323,14 +322,9 @@ class MLP:
         # iterate over epochs
         for e in range(max_epochs):
 
-            # TODO implement SGD
+            # Implementation of SGD
+            # Notes on process:
             # perform pass over every example in training data for each epoch
-            # 1. Choose initial guess theta0 and learning rate alpha
-            # 2. Repeat until convergence to a local minimum:
-            # randomly shuffle samples in training set,
-            # for samples i = 1, 2, ... , n do:
-            # theta t+1 = theta t - alpha * gradienti(theta t) [gradient for single sample i]
-
             # compute loss for examples one at a time
             for x,y in zip(Xmat_train,Y_train):
                     
@@ -418,7 +412,7 @@ def main():
     random.seed(42)
     print("Training neural net with no dropout")
     model = MLP(n_features=d, layer_sizes=[8, 4, 1], learning_rate=0.05, dropout_proba=0.0)
-    model.fit(Xmat_train, Y_train, Xmat_val, Y_val, verbose=False, max_epochs=50)
+    model.fit(Xmat_train, Y_train, Xmat_val, Y_val, verbose=True, max_epochs=50)
     train_acc = accuracy(Y_train, model.predict(Xmat_train))
     val_acc = accuracy(Y_val, model.predict(Xmat_val))
     print(f"Final training accuracy: {train_acc:.0f}%, Validation accuracy: {val_acc:.0f}%")
@@ -432,9 +426,9 @@ def main():
     val_acc = accuracy(Y_val, model.predict(Xmat_val))
     print(f"Final training accuracy: {train_acc:.0f}%, Validation accuracy: {val_acc:.0f}%")
     
-    #####################
-    # Spotify data
-    #####################
+    # #####################
+    # # Spotify data
+    # #####################
     random.seed(42)
     model, X_test, Y_test = spotify_data()
 
