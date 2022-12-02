@@ -65,6 +65,7 @@ def load_transplant_data():
 
     
     Xmat = data.drop(["survival_status"], axis="columns")
+    print("Xmat: ", Xmat)
     Y = np.array([survival for survival in data["survival_status"]])
     return Xmat, Y
 
