@@ -40,11 +40,12 @@ def load_thoracic_data():
     feature_names = [measure for measure in data.columns if "mean" in measure]
     data_features = data[feature_names]
     print("columns: ", data.columns)
-    Xmat = data_features
-    
+    Xmat = data.drop(columns=["Risk1Yr"])
+    # print("data: ", data)
+    # print("Xmat: ", Xmat)
     # split into training, validation, testing
-    Xmat_train, Xmat_test, Y_train, Y_test = train_test_split(Xmat, Y, test_size=0.2, random_state=1)
-    Xmat_train, Xmat_val, Y_train, Y_val = train_test_split(Xmat_train, Y_train, test_size=0.2, random_state=1)
+    Xmat_train, Xmat_test, Y_train, Y_test = train_test_split(Xmat, Y, test_size=0.33, random_state=42)
+    Xmat_train, Xmat_val, Y_train, Y_val = train_test_split(Xmat_train, Y_train, test_size=0.33, random_state=42)
     
     # standardize the data
     mean = np.mean(Xmat_train, axis=0)
