@@ -24,9 +24,6 @@ def load_thoracic_data():
     Helper function for loading bone
     marrow transplant data
     """
-
-
-    
     # open file and process all variable names
     all_variables = []
 
@@ -42,28 +39,51 @@ def load_thoracic_data():
                 var_name = line.split()[-2]
                 all_variables.append(var_name)
 
-
     # subset data to a small number of important variables
     relevant_variables = set(["PRE4", "PRE5", "DGN",
                               "PRE10", "PRE14", "PRE17", "PRE19",
                               "PRE25", "AGE", "Risk1Yr"])
     
-    data = pd.read_csv("transplant.csv", skiprows=106, names=all_variables)
+    data = pd.read_csv("thoracic_data.csv", names=all_variables)
     data.drop(columns=set(data.columns) - relevant_variables, inplace=True) 
+    print("columns: ", data.columns)
 
     # convert disease type to numeric values
-    disease_map = {disease: i for i, disease in enumerate(set(data["DGN"]))}
-    data["DGN"] = [disease_map[d] for d in data["DGN"]]
+    # disease_map = {disease: i for i, disease in enumerate(set(data["DGN"]))}
+    # data["DGN"] = [disease_map[d] for d in data["DGN"]]
 
     # ignore missing data
+    # can probably get rid of this part because the data was already pretty clean
     data.replace({'?': np.nan}, regex=False, inplace=True)
     data.dropna(inplace=True)
 
-    # # convert rest of features to numeric values
-    # for feature in relevant_variables - set(["CD34kgx10d6", "survival_status"]):
-    #     data[feature] = [int(value) for value in data[feature]]
+     # Code to pre-process the data here
+    data_clean = data #data.drop(columns=["id", "name"])
 
-    
-    #Xmat = data.drop(["survival_status"], axis="columns")
-    Y = np.array([survival for survival in data["Risk1Yr"]])
+    Y = data_clean['Risk1Yr']
+    # TODO: more pre-processing if needed and model training, return the predictions on the test
+    # Xmat = data_clean.drop(columns=["PRE4"]).to_numpy()
+    # print("cleaned data: ", data)
+    # Y = data_clean["Risk1Yr"].replace("T", 1) # added to make T/F values into numerical 0/1
+    # Y = data_clean["Risk1Yr"].replace("F", 0)
+    # Xmat = data_clean
+    # print("cleaned outcomes: ", Xmat["Risk1Yr"])
+
+    Xmat_train, Xmat_test, Y_train, Y_test = train_test_split(Xmat, Y, test_size=0.33, random_state=42)
+    Xmat_train, Xmat_val, Y_train, Y_val = train_test_split(Xmat_train, Y_train, test_size=0.33, random_state=42)
+    n, d = Xmat_train.shape
+
+    # NEW ADDITION: STANDARDIZING DATA
+
+    # standardize the data ; need it here because need training split completed
+    mean = np.mean(Xmat_train, axis=0)
+    std = np.std(Xmat_train, axis=0)
+    Xmat_train = (Xmat_train - mean)/std
+    Xmat_val = (Xmat_val - mean)/std
+    Xmat_test = (Xmat_test - mean)/std
+
+    Xmat = data # data.drop(["survival_status"], axis="columns") # got rid of drop portion here bc not dropping anything
+
+    Y = np.array([survival for survival in data['Risk1Yr']])
+
     return Xmat, Y

@@ -32,12 +32,14 @@ def load_thoracic_data():
     # load in data with pandas
     data = pd.read_csv("thoracic_data.csv")
     
-    # convert malignant/benign labels to 1/0 binary labels
-    Y = np.array([1 if risk=="T" else 0 for risk in data["Risk1Yr"]])
-    
+    # convert T/F outcomes to 1/0
+    Y = np.array([1 if risk=="T" else 0 for risk in data["Risk1Yr"]]) # WORKS; succesfulling made Ts into 1 and Fs into 0s
+    print("Y values: ", Y)
+
     # get the feature matrix
     feature_names = [measure for measure in data.columns if "mean" in measure]
     data_features = data[feature_names]
+    print("columns: ", data.columns)
     Xmat = data_features
     
     # split into training, validation, testing

@@ -142,22 +142,10 @@ class LogisticRegression:
 
 def main():
 
-
-    # #################
-    # # Simulated data
-    # #################
-    # np.random.seed(333)
-    # Xmat, Y, feature_names = load_simulated_data()
-    # model = LogisticRegression(learning_rate=0.2)
-    # model.fit(Xmat, Y, max_iterations=10000)
-    # Yhat = model.predict(Xmat)
-    # print("Simulated data results:\n" + "-"*4)
-    # print("Simulated data fitted weights", {feature_names[i]: round(model.theta[i], 2) for i in range(len(feature_names))})
-    
-    # print("Accuracy", accuracy(Y, Yhat))
+    # option to sort by relevant variables here later down the line (see work in dataloader2.py)
 
     #####################
-    # Breast cancer data
+    # TESTING : Thoracic data
     #####################
     feature_names, data = load_thoracic_data()
     model_base = LogisticRegression(learning_rate=0.2, lamda=0.0)
@@ -186,81 +174,6 @@ def main():
     print("Test accuracy", accuracy(data["Y_test"], Yhat_test))
     print("Thoracic data weights", {feature_names[i]: round(best_model.theta[i], 2) for i in range(len(feature_names))})
 
-
-
 if __name__ == "__main__":
     main()
-
-
-# def thoracic_data():
-#     """
-#     Function to analyze spotify data
-#     """
-
-#     data = pd.read_csv("thoracic_data.csv")
-
-#     # Code to pre-process the data here
-#     data_clean = data.drop(columns=["id", "name"])
-
-
-#     # TODO: more pre-processing if needed and model training, return the predictions on the test
-#     Xmat = data_clean.drop(columns=["popularity"]).to_numpy()
-#     Y = data_clean["popularity"].to_numpy()
-#     Xmat_train, Xmat_test, Y_train, Y_test = train_test_split(Xmat, Y, test_size=0.33, random_state=42)
-#     Xmat_train, Xmat_val, Y_train, Y_val = train_test_split(Xmat_train, Y_train, test_size=0.33, random_state=42)
-#     n, d = Xmat_train.shape
-
-#     # standardize the data ; need it here because need training split completed
-#     mean = np.mean(Xmat_train, axis=0)
-#     std = np.std(Xmat_train, axis=0)
-#     Xmat_train = (Xmat_train - mean)/std
-#     Xmat_val = (Xmat_val - mean)/std
-#     Xmat_test = (Xmat_test - mean)/std
-    
-#     model = MLP(n_features=d, layer_sizes=[1])
-#     model.fit(Xmat_train, Y_train, max_epochs=25, verbose=False)
-
-#     return model, Xmat_test, Y_test
-
-# def main():
-#     """
-#     Edit only the one line marked as # EDIT ME in this function. The rest is used for grading purposes
-#     """
-
-#     #################
-#     # Simulated data
-#     #################
-#     Xmat_train, Xmat_val, Y_train, Y_val = make_simulated_data()
-#     n, d = Xmat_train.shape
-
-#     # test base neural net implementation with no dropout
-#     # feel free to toggle the verbose flag to False/True to debug your output
-#     # for the final submission please set it to False
-#     random.seed(42)
-#     print("Training neural net with no dropout")
-#     model = MLP(n_features=d, layer_sizes=[8, 4, 1], learning_rate=0.05, dropout_proba=0.0)
-#     model.fit(Xmat_train, Y_train, Xmat_val, Y_val, verbose=True, max_epochs=50)
-#     train_acc = accuracy(Y_train, model.predict(Xmat_train))
-#     val_acc = accuracy(Y_val, model.predict(Xmat_val))
-#     print(f"Final training accuracy: {train_acc:.0f}%, Validation accuracy: {val_acc:.0f}%")
-
-    
-#     random.seed(0)
-#     print("Training neural net with dropout=0.5")
-#     model = MLP(n_features=d, layer_sizes=[8, 4, 1], learning_rate=0.05, dropout_proba=0.5)
-#     model.fit(Xmat_train, Y_train, Xmat_val, Y_val, verbose=False, max_epochs=50)
-#     train_acc = accuracy(Y_train, model.predict(Xmat_train))
-#     val_acc = accuracy(Y_val, model.predict(Xmat_val))
-#     print(f"Final training accuracy: {train_acc:.0f}%, Validation accuracy: {val_acc:.0f}%")
-    
-#     # #####################
-#     # # Spotify data
-#     # From HW4: need to edit for project purposes
-#     # #####################
-#     random.seed(42)
-#     model, X_test, Y_test = spotify_data()
-
-#     # test final model
-#     test_acc = accuracy(Y_test, model.predict(X_test))
-#     print(f"Spotify test accuracy {test_acc:.0f}%")
 
