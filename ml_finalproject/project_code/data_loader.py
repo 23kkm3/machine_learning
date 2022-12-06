@@ -33,16 +33,27 @@ def load_thoracic_data():
     data = pd.read_csv("thoracic_data.csv")
     
     # convert T/F outcomes to 1/0
-    Y = np.array([1 if risk=="T" else 0 for risk in data["Risk1Yr"]]) # WORKS; succesfulling made Ts into 1 and Fs into 0s
+    Y = np.array([1 if risk=="T" else 0 for risk in data["Risk1Yr"]])
     print("Y values: ", Y)
 
     # get the feature matrix
-    feature_names = [measure for measure in data.columns if "mean" in measure]
+    data = data.drop(columns=["DGN", "PRE6", "PRE14"])
+    print("data: ", data)
+
+    feat = np.array([1 if risk=="T" else 0 for risk in data["PRE5"]]) # repeat for all of the other columns or write loop to iterate over column names
+    data["PRE5"] = feat
+    print("pre5: ", data["PRE5"])
+
+    #data_features = [1 if data.loc[column]=="T" else 0 for column in data.columns]
+    print("revised features: ", )
+    # Xmat = data.drop(columns=["Risk1Yr"])
+
+    feature_names = data.columns
+    print("feature names: ", feature_names)
     data_features = data[feature_names]
-    print("columns: ", data.columns)
-    Xmat = data.drop(columns=["Risk1Yr"])
-    # print("data: ", data)
-    # print("Xmat: ", Xmat)
+
+    Xmat = data_features.to_numpy()
+
     # split into training, validation, testing
     Xmat_train, Xmat_test, Y_train, Y_test = train_test_split(Xmat, Y, test_size=0.33, random_state=42)
     Xmat_train, Xmat_val, Y_train, Y_val = train_test_split(Xmat_train, Y_train, test_size=0.33, random_state=42)
