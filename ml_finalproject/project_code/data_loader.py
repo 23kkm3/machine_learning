@@ -42,18 +42,37 @@ def load_thoracic_data():
 
     feat = np.array([1 if risk=="T" else 0 for risk in data["PRE5"]]) # repeat for all of the other columns or write loop to iterate over column names
     data["PRE5"] = feat
-    print("pre5: ", data["PRE5"])
+    feat1 = np.array([1 if risk=="T" else 0 for risk in data["PRE7"]])
+    data["PRE7"] = feat1
+    feat2 = np.array([1 if risk=="T" else 0 for risk in data["PRE8"]])
+    data["PRE8"] = feat2
+    feat3 = np.array([1 if risk=="T" else 0 for risk in data["PRE9"]])
+    data["PRE9"] = feat3
+    feat4 = np.array([1 if risk=="T" else 0 for risk in data["PRE10"]])
+    data["PRE10"] = feat4
+    feat5 = np.array([1 if risk=="T" else 0 for risk in data["PRE11"]])
+    data["PRE11"] = feat5
+    feat6 = np.array([1 if risk=="T" else 0 for risk in data["PRE17"]])
+    data["PRE17"] = feat6
+    feat7 = np.array([1 if risk=="T" else 0 for risk in data["PRE19"]])
+    data["PRE19"] = feat7
+    feat8 = np.array([1 if risk=="T" else 0 for risk in data["PRE25"]])
+    data["PRE25"] = feat8
+    feat9 = np.array([1 if risk=="T" else 0 for risk in data["PRE30"]])
+    data["PRE30"] = feat9
+    feat10 = np.array([1 if risk=="T" else 0 for risk in data["PRE32"]])
+    data["PRE32"] = feat10
+    feat11 = np.array([1 if risk=="T" else 0 for risk in data["Risk1Yr"]])
+    data["Risk1Yr"] = feat11
 
-    #data_features = [1 if data.loc[column]=="T" else 0 for column in data.columns]
-    print("revised features: ", )
+    print("data: ", data)
     # Xmat = data.drop(columns=["Risk1Yr"])
 
     feature_names = data.columns
     print("feature names: ", feature_names)
     data_features = data[feature_names]
-
     Xmat = data_features.to_numpy()
-
+    print("Xmat: ", Xmat)
     # split into training, validation, testing
     Xmat_train, Xmat_test, Y_train, Y_test = train_test_split(Xmat, Y, test_size=0.33, random_state=42)
     Xmat_train, Xmat_val, Y_train, Y_val = train_test_split(Xmat_train, Y_train, test_size=0.33, random_state=42)

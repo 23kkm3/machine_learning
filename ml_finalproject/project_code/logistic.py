@@ -127,7 +127,7 @@ class LogisticRegression:
         Predict 0/1 labels for a data matrix Xmat based on the following rule:
         if p(Y=1|X) > 0.5 output a label of 1, else output a label of 0
         """
-        # Check the vectorl for probability at ea. row
+        # Check the vector for probability at ea. row
         # We have already obtained out optimal theta bc logistic regression has executed at this point
         Yhat = sigmoid(Xmat@self.theta)
         new_list = []
