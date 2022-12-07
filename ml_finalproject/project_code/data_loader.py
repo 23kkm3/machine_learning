@@ -37,11 +37,11 @@ def load_thoracic_data():
     print("Y values: ", Y)
 
     # get the feature matrix
-    data = data.drop(columns=["DGN", "PRE6", "PRE14"])
+    data = data.drop(columns=["DGN", "PRE6", "PRE14", "PRE5", "PRE19", "Risk1Yr"])
     print("data: ", data)
 
-    feat = np.array([1 if risk=="T" else 0 for risk in data["PRE5"]]) # repeat for all of the other columns or write loop to iterate over column names
-    data["PRE5"] = feat
+    # feat = np.array([1 if risk=="T" else 0 for risk in data["PRE5"]]) # repeat for all of the other columns or write loop to iterate over column names
+    # data["PRE5"] = feat
     feat1 = np.array([1 if risk=="T" else 0 for risk in data["PRE7"]])
     data["PRE7"] = feat1
     feat2 = np.array([1 if risk=="T" else 0 for risk in data["PRE8"]])
@@ -54,16 +54,16 @@ def load_thoracic_data():
     data["PRE11"] = feat5
     feat6 = np.array([1 if risk=="T" else 0 for risk in data["PRE17"]])
     data["PRE17"] = feat6
-    feat7 = np.array([1 if risk=="T" else 0 for risk in data["PRE19"]])
-    data["PRE19"] = feat7
+    # feat7 = np.array([1 if risk=="T" else 0 for risk in data["PRE19"]])
+    # data["PRE19"] = feat7
     feat8 = np.array([1 if risk=="T" else 0 for risk in data["PRE25"]])
     data["PRE25"] = feat8
     feat9 = np.array([1 if risk=="T" else 0 for risk in data["PRE30"]])
     data["PRE30"] = feat9
     feat10 = np.array([1 if risk=="T" else 0 for risk in data["PRE32"]])
     data["PRE32"] = feat10
-    feat11 = np.array([1 if risk=="T" else 0 for risk in data["Risk1Yr"]])
-    data["Risk1Yr"] = feat11
+    # feat11 = np.array([1 if risk=="T" else 0 for risk in data["Risk1Yr"]])
+    # data["Risk1Yr"] = feat11
 
     print("data: ", data)
     # Xmat = data.drop(columns=["Risk1Yr"])
@@ -77,9 +77,12 @@ def load_thoracic_data():
     Xmat_train, Xmat_test, Y_train, Y_test = train_test_split(Xmat, Y, test_size=0.33, random_state=42)
     Xmat_train, Xmat_val, Y_train, Y_val = train_test_split(Xmat_train, Y_train, test_size=0.33, random_state=42)
     
+    # get rid of any features that end up with a std of 0 
     # standardize the data
     mean = np.mean(Xmat_train, axis=0)
+    print("mean: ", mean)
     std = np.std(Xmat_train, axis=0)
+    print("std: ", std)
     Xmat_train = (Xmat_train - mean)/std
     Xmat_val = (Xmat_val - mean)/std
     Xmat_test = (Xmat_test - mean)/std
