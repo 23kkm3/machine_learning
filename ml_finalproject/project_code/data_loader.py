@@ -73,6 +73,7 @@ def load_thoracic_data():
     data_features = data[feature_names]
     Xmat = data_features.to_numpy()
     print("Xmat: ", Xmat)
+
     # split into training, validation, testing
     Xmat_train, Xmat_test, Y_train, Y_test = train_test_split(Xmat, Y, test_size=0.33, random_state=42)
     Xmat_train, Xmat_val, Y_train, Y_val = train_test_split(Xmat_train, Y_train, test_size=0.33, random_state=42)
