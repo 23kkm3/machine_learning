@@ -131,8 +131,9 @@ def main():
         print("Test accuracy", round(accuracy(Ytest, model.predict(Xtest)), 2), "\n")
 
     classifier = tree.DecisionTreeClassifier(random_state=0)
-    #iris = load_iris()
+
     classifier = classifier.fit(Xtrain, Ytrain)
+    plt.figure(figsize=(12,12))
     tree.plot_tree(classifier, filled=True)
     plt.show()
     
