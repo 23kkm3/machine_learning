@@ -21,36 +21,34 @@ from IPython.display import Image
 from six import StringIO
 from numpy.core.numeric import full
 
-# def classification_report(Y, Yhat, train=True):
-#     """
-#     Produce a classification report including
-#     accuracy, precision, recall, and f1 scores
-#     for the model.
-#     """
+def accuracy(Y, Yhat):
+    """
+    Function for computing accuracy
     
-#     ################
-#     # COMPONENT 1
-#     ################
-#     if train:
-#         print("-"*10)
-#         print("Training results")
-#         print("-"*10)
-#     else:
-#         print("-"*10)
-#         print("Testing results")
-#         print("-"*10)
-#     print("Accuracy", round(accuracy_score(Y, Yhat), 3))
-#     print("F1 score", round(f1_score(Y, Yhat), 3))
-#     print("Precision", round(precision_score(Y, Yhat), 3))
-#     print("Recall", round(recall_score(Y, Yhat), 3))
+    Y is a vector of the true labels and Yhat is a vector of estimated 0/1 labels
+    """
+    
+    return np.sum(Y==Yhat)/len(Y)
 
-#     full_data = pd.read_csv("thoracic_data.csv")
+# def print_tree(self, vertex=None, indent="  "):
+#         """
+#         Function to produce text representation of the tree
+#         """
+        
+#         # initialize to root node
+#         if not vertex:
+#             vertex = self.root
 
-#     print("Data columns", full_data.columns)
-#     #print(full_data.StandardHours)
-#     print("data: ", full_data)
-#     print("Data columns", full_data.columns)
+#         # if we're at the leaf output the prediction
+#         if vertex.prediction is not None:
+#             print("Output", vertex.prediction)
 
+#         else:
+#             print(vertex.feature_name, "<", round(vertex.threshold, 2), "?")
+#             print(indent, "Left child: ", end="")
+#             self.print_tree(vertex.left_child, indent + indent)
+#             print(indent, "Right child: ", end="")
+#             self.print_tree(vertex.right_child, indent + indent)
 
 def main():
 
@@ -59,7 +57,6 @@ def main():
     ################
 
     data = pd.read_csv("thoracic_data.csv")
-    print("FULL DATA", data)
 
     # make outcome array
     Y = np.array([1 if outcome=="T" else 0 for outcome in data["Risk1Yr"]])
@@ -91,25 +88,85 @@ def main():
     data["PRE32"] = feat10
 
     data = data.drop(columns=["Risk1Yr"])
+    feature_names = data.columns
+    print("features: ", feature_names)
+    data_features = data[feature_names]
     Xmat = data_features.to_numpy()
-    print("REVISED DATA", data)
+    print("REVISED DATA", Xmat)
 
-    # create train and test splits
-    X_train, X_test, Y_train, Y_test = train_test_split(Xmat, Y, test_size=0.3, random_state=42)
-    X_train, Xmat_val, Y_train, Y_val = train_test_split(X_train, Y_train, test_size=0.33, random_state=42)
+    #################
+    # Simulated data
+    #################
+    np.random.seed(333)
+    data = Xmat.copy()
+
+
+    # simulated data componenet cut out from below 
+    model = DecisionTreeClassifier()
+
+    # test for your fit method
+    model.fit(Xmat, Y)
+    print("-"*60 + "\n" + "Algorithmically generated tree for testing build_tree\n" + "-"*60)
+    #model.print_tree()
+    Yhat = model.predict(data)
+    print("Accuracy of algorithmically generated tree", round(accuracy(Y, Yhat), 2), "\n")
+
+    # create a train test split
+    Xtrain, Xtest, Ytrain, Ytest = train_test_split(Xmat, Y, test_size=0.25, random_state=0)
+    # Xtrain.reset_index(inplace=True, drop=True)
+    # Xtest.reset_index(inplace=True, drop=True)
+
+    # find best depth using a form of cross validation/bootstrapping
+    possible_depths = [1, 2, 3, 4, 5]
+    best_depth = 0
+    best_accuracy = 0
+    for depth in possible_depths:
     
-    # classification_report(Y, Yhat, train=True)
+        accuracies = []
+        for i in range(5):
+            print("training tree", i)
+            Xtrain_i, Xval, Ytrain_i, Yval = train_test_split(Xtrain, Ytrain, test_size=0.3, random_state=i)
+            # Xtrain_i.reset_index(inplace=True, drop=True)
+            # Xval.reset_index(inplace=True, drop=True)
+            model = DecisionTreeClassifier(max_depth=depth)
+            model.fit(Xtrain_i, Ytrain_i)
+            # model.fit(Xtrain_i, Ytrain_i, "Risk1Yr")
+            accuracies.append(accuracy(Yval, model.predict(Xval)))
+           
+    
+        mean_accuracy = sum(accuracies)/len(accuracies)
+        if mean_accuracy > best_accuracy:
+            best_accuracy = mean_accuracy
+            best_depth = depth
+    
 
-    ################
-    # COMPONENT 3
-    ################
-    model = DecisionTreeClassifier(max_depth=2, criterion="entropy", random_state=0)
-    model.fit(X_train, Y_train)
+        print("-"*60 + "\n" + "Hyperparameter tuning on transplant data\n" + "-"*60)
+        print("Best depth =", best_depth, "\n")
+        model = DecisionTreeClassifier(max_depth=best_depth)
+        model.fit(Xtrain, Ytrain)
+        # model.fit(Xtrain, Ytrain, "Risk1Yr")
+        print("-"*60 + "\n" + "Final tree for transplant data\n" + "-"*60)
+        # model.print_tree()
+        print("Test accuracy", round(accuracy(Ytest, model.predict(Xtest)), 2), "\n")
 
-    dot_data = StringIO()
-    export_graphviz(model, out_file=dot_data, feature_names=list(Xmat.columns), filled=True)
-    graph = pydot.graph_from_dot_data(dot_data.getvalue())
-    Image(graph[0].create_png())
+
+    # # create train and test splits
+    # X_train, X_test, Y_train, Y_test = train_test_split(Xmat, Y, test_size=0.3, random_state=42)
+    # X_train, Xmat_val, Y_train, Y_val = train_test_split(X_train, Y_train, test_size=0.33, random_state=42)
+    
+    # # classification_report(Y, Yhat, train=True)
+
+    # ################
+    # # COMPONENT 3
+    # ################
+    # model = DecisionTreeClassifier(max_depth=2, criterion="entropy", random_state=0)
+    # model.fit(X_train, Y_train)
+
+    # dot_data = StringIO()
+    # export_graphviz(model, out_file=dot_data, feat_names=feature_names, filled=True)
+    # export_graphviz(model, out_file=dot_data, feat_names=feature_names, filled=True)
+    # graph = pydot.graph_from_dot_data(dot_data.getvalue())
+    # Image(graph[0].create_png())
 
 
 if __name__ == "__main__":
