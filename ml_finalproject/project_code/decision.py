@@ -7,6 +7,7 @@ from sklearn.tree import DecisionTreeClassifier, plot_tree
 from sklearn.ensemble import RandomForestClassifier
 from sklearn.linear_model import LogisticRegression
 from scipy import stats
+from sklearn import tree 
 
 # modules for splitting and evaluating the data
 from sklearn.model_selection import train_test_split
@@ -30,26 +31,6 @@ def accuracy(Y, Yhat):
     
     return np.sum(Y==Yhat)/len(Y)
 
-# def print_tree(self, vertex=None, indent="  "):
-#         """
-#         Function to produce text representation of the tree
-#         """
-        
-#         # initialize to root node
-#         if not vertex:
-#             vertex = self.root
-
-#         # if we're at the leaf output the prediction
-#         if vertex.prediction is not None:
-#             print("Output", vertex.prediction)
-
-#         else:
-#             print(vertex.feature_name, "<", round(vertex.threshold, 2), "?")
-#             print(indent, "Left child: ", end="")
-#             self.print_tree(vertex.left_child, indent + indent)
-#             print(indent, "Right child: ", end="")
-#             self.print_tree(vertex.right_child, indent + indent)
-
 def main():
 
     ################
@@ -66,7 +47,6 @@ def main():
 
     # separate features from the outcome
     data_features = data.drop(["Risk1Yr"], axis="columns")
-
 
     feat1 = np.array([1 if risk=="T" else 0 for risk in data["PRE7"]])
     data["PRE7"] = feat1
@@ -89,10 +69,10 @@ def main():
 
     data = data.drop(columns=["Risk1Yr"])
     feature_names = data.columns
-    print("features: ", feature_names)
+    # print("features: ", feature_names)
     data_features = data[feature_names]
     Xmat = data_features.to_numpy()
-    print("REVISED DATA", Xmat)
+    # print("REVISED DATA", Xmat)
 
     #################
     # Simulated data
@@ -107,7 +87,8 @@ def main():
     # test for your fit method
     model.fit(Xmat, Y)
     print("-"*60 + "\n" + "Algorithmically generated tree for testing build_tree\n" + "-"*60)
-    #model.print_tree()
+    text_representation = tree.export_text(model)
+    print("tree repres: ", text_representation)
     Yhat = model.predict(data)
     print("Accuracy of algorithmically generated tree", round(accuracy(Y, Yhat), 2), "\n")
 
@@ -144,30 +125,10 @@ def main():
         print("Best depth =", best_depth, "\n")
         model = DecisionTreeClassifier(max_depth=best_depth)
         model.fit(Xtrain, Ytrain)
-        # model.fit(Xtrain, Ytrain, "Risk1Yr")
+        # model.fit(Xtrain, Ytrain, Y)
         print("-"*60 + "\n" + "Final tree for transplant data\n" + "-"*60)
         # model.print_tree()
         print("Test accuracy", round(accuracy(Ytest, model.predict(Xtest)), 2), "\n")
-
-
-    # # create train and test splits
-    # X_train, X_test, Y_train, Y_test = train_test_split(Xmat, Y, test_size=0.3, random_state=42)
-    # X_train, Xmat_val, Y_train, Y_val = train_test_split(X_train, Y_train, test_size=0.33, random_state=42)
-    
-    # # classification_report(Y, Yhat, train=True)
-
-    # ################
-    # # COMPONENT 3
-    # ################
-    # model = DecisionTreeClassifier(max_depth=2, criterion="entropy", random_state=0)
-    # model.fit(X_train, Y_train)
-
-    # dot_data = StringIO()
-    # export_graphviz(model, out_file=dot_data, feat_names=feature_names, filled=True)
-    # export_graphviz(model, out_file=dot_data, feat_names=feature_names, filled=True)
-    # graph = pydot.graph_from_dot_data(dot_data.getvalue())
-    # Image(graph[0].create_png())
-
 
 if __name__ == "__main__":
     main()
