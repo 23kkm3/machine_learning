@@ -121,12 +121,12 @@ def main():
             best_depth = depth
     
 
-        print("-"*60 + "\n" + "Hyperparameter tuning on transplant data\n" + "-"*60)
+        print("-"*60 + "\n" + "Hyperparameter tuning on thoracic data\n" + "-"*60)
         print("Best depth =", best_depth, "\n")
         model = DecisionTreeClassifier(max_depth=best_depth)
         model.fit(Xtrain, Ytrain)
         # model.fit(Xtrain, Ytrain, Y)
-        print("-"*60 + "\n" + "Final tree for transplant data\n" + "-"*60)
+        print("-"*60 + "\n" + "Final tree for thoracic data\n" + "-"*60)
         # model.print_tree()
         print("Test accuracy", round(accuracy(Ytest, model.predict(Xtest)), 2), "\n")
 
