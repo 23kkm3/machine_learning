@@ -43,7 +43,7 @@ def main():
     Y = np.array([1 if outcome=="T" else 0 for outcome in data["Risk1Yr"]])
 
     # drop irrelevant features
-    data = data.drop(columns=["DGN", "PRE6", "PRE14", "PRE5", "PRE19"])
+    data = data.drop(columns=["DGN", "PRE6", "PRE14", "PRE5", "PRE19", "AGE"])
 
     # separate features from the outcome
     data_features = data.drop(["Risk1Yr"], axis="columns")

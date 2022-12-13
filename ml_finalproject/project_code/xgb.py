@@ -7,6 +7,9 @@ from sklearn.tree import DecisionTreeClassifier, plot_tree
 from sklearn.ensemble import RandomForestClassifier
 from sklearn.linear_model import LogisticRegression
 from sklearn.neural_network import MLPClassifier
+from sklearn import preprocessing
+from sklearn.pipeline import make_pipeline
+from sklearn.preprocessing import StandardScaler
 from scipy import stats
 
 # modules for splitting and evaluating the data
@@ -15,6 +18,8 @@ from sklearn.metrics import accuracy_score, precision_score, recall_score, f1_sc
 
 # import xgboost library and MSE loss function from sklearn library 
 import xgboost as xgb
+from xgboost import XGBClassifier
+from xgboost import XGBRegressor
 from sklearn.metrics import mean_squared_error
 
 import matplotlib.pyplot as plt
@@ -78,7 +83,7 @@ def main():
 
 
     # LOGISTIC REGRESSION
-    model = LogisticRegression()
+    model = LogisticRegression(max_iter=1000)
     model.fit(Xtrain, Ytrain)
 
     # DECISION TREE
@@ -86,39 +91,45 @@ def main():
     model_tree.fit(Xtrain, Ytrain)
 
     # RANDOM FOREST 
-    # model_forest = RandomForestClassifier(n_estimators=200)
-    # model_forest.fit(Xmat, Ytrain)
+    model_forest = RandomForestClassifier(n_estimators=100)
+    model_forest.fit(Xtrain, Ytrain)
 
     # NEURAL NETWORK
-    model_neural_net = MLPClassifier(solver='lbfgs', alpha=1e-5, hidden_layer_sizes=(5,2), random_state=1)
+    model_neural_net = MLPClassifier(solver='lbfgs', alpha=1e-5, hidden_layer_sizes=(5,2), random_state=1, max_iter=1000)
     model_neural_net.fit(Xtrain, Ytrain)
 
     # XGBOOST
+    # ATTEMPT 1 = 0.788 WITH XGBClassifier
     # training model with param list and data set
-    model = xgb.train(data_features, Xtrain)
-    # xg = xgb.XGBRegressor(objective='reg:linear', colsample_bytree=0.3, learning_rate=0.1, max_depth = 5, alpha = 10, n_estimators = 10)
-    model.save_model("xgb.model.test")
+    # model_xg = XGBRegressor(n_estimators=100)
+    # model_xg.fit(Xtrain, Ytrain)
+    # y_prediction = model_xg.predict(Xtest)
+    # print("mse: ", 1-mean_squared_error(Ytest, y_prediction))
 
-    model.dump_model("dump.raw.txt")
+    # ATTEMPT 2 = 0.80 with XGBRegressor
+    # ATTEMPT 3 = 0.8234 w/ XGBClassifier
+    # ATTEMPT 4 = 
+    scaler = preprocessing.StandardScaler().fit(Xtrain)
+    pipe = make_pipeline(StandardScaler(), XGBRegressor())
+    pipe.fit(Xtrain, Ytrain)
 
-    model.dump_model("dump.raw.txt", "featuremap.txt")
+    print("pipe score: ", pipe.score(Xtest, Ytest))
+    regressor = xgb.XGBRegressor(
+        n_estimators=100,
+        reg_lambda=1,
+        gamma=0,
+        max_depth=3
+    )
 
-    model = xgb.Booster({'nthread': 4}) # initial model
+    regressor.fit(Xtrain, Ytrain)
+    y_prediction = regressor.predict(Xtest)
 
-    xgb.plot_importance(model)
-    xgb.plot_tree(model, num_trees=2)
-    xgb.to_graphviz(model, num_trees=2)
-    # xg = xgb.config_context()
+    print("mse: ", 1-mean_squared_error(Ytest, y_prediction))
 
-    # xg.fit(Xtrain, Ytrain)
 
-    # predictions = xg.predict(Xtest)
-
-    # root_mse = np.sqrt(mean_squared_error(Ytest, predictions))
-    # print("Root MSE: %f" , (root_mse))
     # print("Logistic regression train acc", accuracy(Ytrain, model.predict(Xtrain)), "test acc", accuracy(Ytest, model.predict(Xtest)))
     # print("Decision tree train acc", accuracy(Ytrain, model_tree.predict(Xtrain)), "test acc", accuracy(Ytest, model_tree.predict(Xtest)))
-    # # print("Random forest train acc", accuracy(Ytrain, model_forest.predict(Xtrain)), "test acc", accuracy(Ytest, model_forest.predict(Xtest)))
+    # print("Random forest train acc", accuracy(Ytrain, model_forest.predict(Xtrain)), "test acc", accuracy(Ytest, model_forest.predict(Xtest)))
     # print("Neural network train acc", accuracy(Ytrain, model_neural_net.predict(Xtrain)), "test acc", accuracy(Ytest, model_neural_net.predict(Xtest)))
 
 if __name__ == "__main__":
