@@ -4,7 +4,7 @@ This project was researched and created by Kelly McCarthy for the CSCI374: Machi
 
 FILES + DESCRIPTIONS:
 1. data_loader.py = pre-processing file used for Logistic Regression implementation in logistic.py
-2. decision.py = decision tree implementation
+2. decision.py = Decision Tree model implementation with sklearn packages
 3. logistic_visual.py = file used for experimenting with visualizing Logistic Regression (contents were not used towards final write-up)
 4. logistic.py = Logistic Regression implementation, derived as an extension of Homework 2
 5. main.py = main file that contains implementation for all six models
