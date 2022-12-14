@@ -17,6 +17,13 @@ Files + Descriptions:
 INSTRUCTIONS TO RUN CODE:
 For a singular output of all six models (Naive Bayes, Logistic Regression, Decision Tree, Random Forest, Neural Network and XGBoost), simply run 'python3 main.py.' All model implementations were consolidated into this file after being separately created in their corresponding files. 
 
+IMPORTANT GITHUB NOTE:
+If there is difficulty running the contents of these files, the repository should be publically accessible at: https://github.com/23kkm3/machine_learning.git 
+
+Navigate to 'ml_finalproject' and then 'project_code' for file access.
+
+DATA SET INFORMATION:
+
 The original data set retrieved from the UCI Machine Learning Repository (https://archive.ics.uci.edu/ml/datasets/Thoracic+Surgery+Data) was in Attribute-Relation File Format (.arff extension).  
 I converted the contents of my .arff file to a .csv file. The name of the file is 'thoracic_surgery.csv'. 
 
