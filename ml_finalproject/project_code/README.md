@@ -2,7 +2,7 @@ DECEMBER 2022
 
 This project was researched and created by Kelly McCarthy for the CSCI374: Machine Learning course at Williams College.
 
-Files + Descriptions:
+FILES + DESCRIPTIONS:
 1. data_loader.py = pre-processing file used for Logistic Regression implementation in logistic.py
 2. decision.py = decision tree implementation
 3. logistic_visual.py = file used for experimenting with visualizing Logistic Regression (contents were not used towards final write-up)
