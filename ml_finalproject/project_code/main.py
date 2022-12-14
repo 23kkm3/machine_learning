@@ -7,9 +7,8 @@ from sklearn.tree import DecisionTreeClassifier, plot_tree
 from sklearn.ensemble import RandomForestClassifier
 from sklearn.linear_model import LogisticRegression
 from sklearn.neural_network import MLPClassifier
-from sklearn import preprocessing
-from sklearn.pipeline import make_pipeline
-from sklearn.preprocessing import StandardScaler
+from sklearn.naive_bayes import CategoricalNB
+
 from scipy import stats
 
 # modules for splitting and evaluating the data
@@ -22,9 +21,6 @@ from xgboost import XGBClassifier
 from xgboost import XGBRegressor
 from sklearn.metrics import mean_squared_error
 
-import matplotlib.pyplot as plt
-
-from sklearn.tree import export_graphviz
 
 def accuracy(Y, Yhat):
     """
@@ -81,64 +77,26 @@ def main():
     # create a train test split
     Xtrain, Xtest, Ytrain, Ytest = train_test_split(Xmat, Y, test_size=0.25, random_state=0)
 
-
-    # LOGISTIC REGRESSION
-    model = LogisticRegression(max_iter=1000)
+    naive = CategoricalNB()
+    predictions = naive.fit(Xtrain, Ytrain).predict(Xtest)
+    model = LogisticRegression(solver='saga', max_iter=1000, penalty='elasticnet', l1_ratio=0)
     model.fit(Xtrain, Ytrain)
-
-    # DECISION TREE
-    model_tree = DecisionTreeClassifier(max_depth=None, criterion="entropy")
+    model_tree = DecisionTreeClassifier(max_depth=None, criterion="gini")
     model_tree.fit(Xtrain, Ytrain)
-
-    # RANDOM FOREST 
-    model_forest = RandomForestClassifier(n_estimators=100)
+    model_forest = RandomForestClassifier(n_estimators=10, criterion="gini")
     model_forest.fit(Xtrain, Ytrain)
-
-    # NEURAL NETWORK
-    model_neural_net = MLPClassifier(solver='adam', alpha=1e-5, hidden_layer_sizes=(5,2), random_state=1, max_iter=1000)
+    model_neural_net = MLPClassifier(solver='lbfgs', alpha=1e-5, hidden_layer_sizes=(5,2), random_state=1)
     model_neural_net.fit(Xtrain, Ytrain)
-
-    # XGBOOST
-    # ATTEMPT 1 = 0.788 WITH XGBClassifier
-    # training model with param list and data set
     model_xg = xgb.XGBClassifier(n_estimators=100)
     model_xg.fit(Xtrain, Ytrain)
     y_prediction = model_xg.predict(Xtest)
-    # print("mse: ", 1-mean_squared_error(Ytest, y_prediction))
-    print("predictions: ", y_prediction)
-    # print("model accuracy: ", accuracy_score(Ytest, y_prediction, normalize=False))
+
+    print("Naive Bayes train acc", accuracy(Ytrain, naive.predict(Xtrain)), "test acc", accuracy(Ytest, naive.predict(Xtest)))
+    print("Logistic regression train acc", accuracy(Ytrain, model.predict(Xtrain)), "test acc", accuracy(Ytest, model.predict(Xtest)))
+    print("Decision tree train acc", accuracy(Ytrain, model_tree.predict(Xtrain)), "test acc", accuracy(Ytest, model_tree.predict(Xtest)))
+    print("Random forest train acc", accuracy(Ytrain, model_forest.predict(Xtrain)), "test acc", accuracy(Ytest, model_forest.predict(Xtest)))
+    print("Neural network train acc", accuracy(Ytrain, model_neural_net.predict(Xtrain)), "test acc", accuracy(Ytest, model_neural_net.predict(Xtest)))
     print("XGBoost train acc", accuracy(Ytrain, model_xg.predict(Xtrain)), "test acc", accuracy(Ytest, model_xg.predict(Xtest)))
-
-
-    # ATTEMPT 2 = 0.80 with XGBRegressor
-    # ATTEMPT 3 = 0.8234 w/ XGBClassifier
-    # ATTEMPT 4 = 
-    # scaler = preprocessing.StandardScaler().fit(Xtrain)
-    # pipe = make_pipeline(StandardScaler(), XGBClassifier())
-    # pipe.fit(Xtrain, Ytrain)
-
-    # print("pipe score: ", pipe.score(Xtest, Ytest))
-    # regressor = xgb.XGBClassifier(
-    #     n_estimators=100,
-    #     reg_lambda=1,
-    #     gamma=0,
-    #     max_depth=3
-    # )
-
-    # regressor.fit(Xtrain, Ytrain)
-    # y_prediction = regressor.predict(Xtest)
-
-    # predictions = [round(value) for value in y_prediction]
-
-    # acc = accuracy_score(Ytest, predictions)
-    # print("accuracy: ", acc)
-    # print("mse: ", 1-mean_squared_error(Ytest, y_prediction))
-
-
-    # print("Logistic regression train acc", accuracy(Ytrain, model.predict(Xtrain)), "test acc", accuracy(Ytest, model.predict(Xtest)))
-    # print("Decision tree train acc", accuracy(Ytrain, model_tree.predict(Xtrain)), "test acc", accuracy(Ytest, model_tree.predict(Xtest)))
-    # print("Random forest train acc", accuracy(Ytrain, model_forest.predict(Xtrain)), "test acc", accuracy(Ytest, model_forest.predict(Xtest)))
-    # print("Neural network train acc", accuracy(Ytrain, model_neural_net.predict(Xtrain)), "test acc", accuracy(Ytest, model_neural_net.predict(Xtest)))
 
 if __name__ == "__main__":
     main() 

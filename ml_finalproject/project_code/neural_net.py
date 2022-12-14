@@ -70,18 +70,18 @@ def main():
     Xtrain, Xtest, Ytrain, Ytest = train_test_split(Xmat, Y, test_size=0.25, random_state=0)
 
 
-    model = LogisticRegression()
-    model.fit(Xtrain, Ytrain)
-    model_tree = DecisionTreeClassifier(max_depth=None, criterion="entropy")
-    model_tree.fit(Xtrain, Ytrain)
-    model_forest = RandomForestClassifier(n_estimators=100)
-    model_forest.fit(Xtrain, Ytrain)
+    # model = LogisticRegression(solver='saga', max_iter=1000, penalty='elasticnet', l1_ratio=0)
+    # model.fit(Xtrain, Ytrain)
+    # model_tree = DecisionTreeClassifier(max_depth=None, criterion="log_loss")
+    # model_tree.fit(Xtrain, Ytrain)
+    # model_forest = RandomForestClassifier(n_estimators=10, criterion="log_loss")
+    # model_forest.fit(Xtrain, Ytrain)
     model_neural_net = MLPClassifier(solver='lbfgs', alpha=1e-5, hidden_layer_sizes=(5,2), random_state=1)
     model_neural_net.fit(Xtrain, Ytrain)
 
-    print("Logistic regression train acc", accuracy(Ytrain, model.predict(Xtrain)), "test acc", accuracy(Ytest, model.predict(Xtest)))
-    print("Decision tree train acc", accuracy(Ytrain, model_tree.predict(Xtrain)), "test acc", accuracy(Ytest, model_tree.predict(Xtest)))
-    print("Random forest train acc", accuracy(Ytrain, model_forest.predict(Xtrain)), "test acc", accuracy(Ytest, model_forest.predict(Xtest)))
+    # print("Logistic regression train acc", accuracy(Ytrain, model.predict(Xtrain)), "test acc", accuracy(Ytest, model.predict(Xtest)))
+    # print("Decision tree train acc", accuracy(Ytrain, model_tree.predict(Xtrain)), "test acc", accuracy(Ytest, model_tree.predict(Xtest)))
+    # print("Random forest train acc", accuracy(Ytrain, model_forest.predict(Xtrain)), "test acc", accuracy(Ytest, model_forest.predict(Xtest)))
     print("Neural network train acc", accuracy(Ytrain, model_neural_net.predict(Xtrain)), "test acc", accuracy(Ytest, model_neural_net.predict(Xtest)))
 if __name__ == "__main__":
     main() 

@@ -1,6 +1,24 @@
-The original data set retrieved from the UCI Machine Learning Repository (https://archive.ics.uci.edu/ml/datasets/Thoracic+Surgery+Data) was in Attribute-Relation File Format (.arff extension).  
+DECEMBER 2022
 
-The code editor that I wanted to use for the duration of this project was VScode and in order to complete the necessary pre-processing that I wanted to, I converted the contents of my .arff file to a .csv file. The name of the file is 'thoracic_surgery.csv'. 
+This project was researched and created by Kelly McCarthy for the CSCI374: Machine Learning course at Williams College.
+
+Files + Descriptions:
+1. data_loader.py = pre-processing file used for Logistic Regression implementation in logistic.py
+2. decision.py = decision tree implementation
+3. logistic_visual.py = file used for experimenting with visualizing Logistic Regression (contents were not used towards final write-up)
+4. logistic.py = Logistic Regression implementation, derived as an extension of Homework 2
+5. main.py = main file that contains implementation for all six models
+6. naive_bayes.py = Naive Bayes model implementation with sklearn packages
+7. neural_net.py = Neural Network model implementation with sklearn packages
+8. README.md = This current file, which provides instructions and descriptions of the project
+9. thoracic_data.csv = csv file of Thoracic Surgery Data
+10. xgb.py = XGBoost model implementation via sklearn packages
+
+INSTRUCTIONS TO RUN CODE:
+For a singular output of all six models (Naive Bayes, Logistic Regression, Decision Tree, Random Forest, Neural Network and XGBoost), simply run 'python3 main.py.' All model implementations were consolidated into this file after being separately created in their corresponding files. 
+
+The original data set retrieved from the UCI Machine Learning Repository (https://archive.ics.uci.edu/ml/datasets/Thoracic+Surgery+Data) was in Attribute-Relation File Format (.arff extension).  
+I converted the contents of my .arff file to a .csv file. The name of the file is 'thoracic_surgery.csv'. 
 
 Listed below are the original contents of the .arff file. Here is a brief description of the what the components represent: 
 

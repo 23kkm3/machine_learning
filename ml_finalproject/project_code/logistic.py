@@ -87,7 +87,7 @@ class LogisticRegression:
             if self.lamda != None:
                 grad = ((mean_negative_loglikelihood(Y, new_Yhat) + self.lamda * (np.sum((theta_p_plus_h)**2))) - (mean_negative_loglikelihood(Y, Yhat) + self.lamda * (np.sum((theta_p)**2))))/h
             else:
-            #gradient calculation using mean negative log likelihood as loss function
+                #gradient calculation using mean negative log likelihood as loss function
                 grad = (mean_negative_loglikelihood(Y, new_Yhat) - mean_negative_loglikelihood(Y, Yhat))/h
 
             grad_vec[x] = grad

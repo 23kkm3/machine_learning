@@ -3,30 +3,6 @@ import numpy as np
 from sklearn.model_selection import train_test_split
 
 
-# def load_simulated_data():
-#     """
-#     Load simulated data and return an X matrix
-#     for features and Y vector for outcomes
-#     """
-
-#     # load data with pandas
-#     data = pd.read_csv("simulated_data.csv")
-#     feature_names = ["intercept"] + list(data.columns)
-#     feature_names.remove("Y")
-
-#     # convert to numpy matrix
-#     Dmat = data.to_numpy()
-#     n, d = Dmat.shape
-
-#     # separate X matrix and Y vector
-#     Xmat = Dmat[:, 0:-1]
-#     Y = Dmat[:, -1]
-
-#     # add a column of 1s for intercept term and return
-#     Xmat = np.column_stack((np.ones(n), Xmat))
-#     return Xmat, Y, feature_names
-
-
 def load_thoracic_data():
     
     # load in data with pandas
